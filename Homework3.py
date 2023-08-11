@@ -10,11 +10,11 @@ for line in splittedToLines:  # Iterating through each line in the initial text
     tempSentences = []  # Temporary list
     for sentence in sentences:  # Iterating through the sentences in each line
         m = re.search(r'\s*(\w*)', sentence)  # Searching for the first word skipping the preceding spaces
-        if m != None:  # If word exists (not just new line character)
+        if m is not None:  # If word exists (not just new line character)
             tempSentence = re.sub(m.group(1), m.group(1).capitalize(), sentence)  # Assigning capitalized sentence to the temporary variable
             tempSentences.append(tempSentence)  # Adding sentence to the temporary list
         n = re.search(r'\s*(\w+)$', sentence)  # Searching for the end word in each line (paragraph)
-        if n != None:  # If word exists (not just new line character)
+        if n is not None:  # If word exists (not just new line character)
             newSentence.append(n.group(1))  # Adding the word to the list
     sentences = '.'.join(tempSentences)  # Joining separate capitalized sentences into the line
     tempLines.append(sentences)  # Adding line with capitalized sentences to the temporary variable
