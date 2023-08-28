@@ -14,3 +14,8 @@ Actual until: 04/10/2023, 50 days left
 Necrologue -----------
 World got much better! 
 In the memory of Putin
+
+Record from text file -----------
+The sun is bright. The water is cool.
+The vodka is strong.
+
