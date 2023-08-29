@@ -1,6 +1,7 @@
 from datetime import date, datetime, timedelta  # import libraries required for working with date and time
 import re
 import os
+from datetime import date, datetime, timedelta
 from Homework4 import capitalize_line
 
 
@@ -63,35 +64,6 @@ class Necrologue (Publication):  # Necrologue class (child for Publication class
         self.customstring = 'In the memory of ' + deceased  # Writes "In the memory of <Person>" in the third line of the publication
         super(Necrologue, self).getdata()
 
-class FromTxtFile (Publication):  # Class for providing records from text file
-    def __init__(self):
-        self.caption = "Record from text file -----------\n"
-
-    def getdata(self):  # method for getting all the required data extended for a FromTxtFile class
-        defaultfolder = "C:\\Folder\\"  # Default path is "C:\Folder"
-        while True:
-            filepath = input('Provide paths to a text file ')  # Getting the path to the file from console
-            l = re.search(r'^\w{1}:\\\w+', filepath)  # Searching for full path pattern (starts with a drive letter, followed by ":\")
-            if l is None:  # If just a filename (w/o full path)
-                filepath = defaultfolder + filepath  # Append default path, otherwise the path is already full
-            if os.path.exists(filepath) == False:
-                print('Wrong path!\n')
-            else:
-                break
-        f = open(filepath, "r")  # open file for read
-        text = f.read()  # reading the context and assigning to text variable
-        text = text.lower()  # Coverting to the lower case
-        textSplittedToLines = text.splitlines()  # Splitting the text into separate lines (each line is a recordd)
-        tempLines = []  # Temporary list for lines
-        for line in textSplittedToLines:  # Iterating through each line in the initial text
-            line = capitalize_line(line)  # Capitalizing the line
-            tempLines.append(line)  # Adding line with capitalized sentences to the temporary variable
-        self.text = '\n'.join(tempLines)  # Re-assembling processed text in the string
-        # self.text = text
-        f.close()  # Closing the file
-        os.remove(filepath)  # Deleting the file after processing
-        self.customstring = ''  # Writes nothing in the third line of the publication
-
 while True:  # A loop for main menu
     print('Select the type of publication:\n1 - News\n2 - Private Advertisement\n3 - Necrologue\n4 - Input from file\n0 - Quit')
     while True:
@@ -104,12 +76,57 @@ while True:  # A loop for main menu
         break
     elif userChoice == '1':
         a = News()
+        a.getdata()
     elif userChoice == '2':
         a = PrivateAd()
+        a.getdata()
     elif userChoice == '3':
         a = Necrologue()
+        a.getdata()
     elif userChoice == '4':
-        a = FromTxtFile()
-    a.getdata()  # Get required data
+        defaultfolder = "C:\\Folder\\"  # Default path is "C:\Folder"
+        while True:
+            filepath = input('Provide path to a text file ')  # Getting the path to the file from console
+            l = re.search(r'^\w{1}:\\\w+', filepath)  # Searching for full path pattern (starts with a drive letter, followed by ":\")
+            if l is None:  # If just a filename (w/o full path)
+                filepath = defaultfolder + filepath  # Append default path, otherwise the path is already full
+            if os.path.exists(filepath) == False:
+                print('Wrong path!\n')
+            else:
+                break
+        f = open(filepath, "r")  # open file for read
+        line = f.read()  # reading the context and assigning to text variable
+        line = line.lower()  # Coverting to the lower case
+        m = re.search(r'%type:(\w+)%', line)
+        # print(m.group(1))
+        if m is None:
+            print('Wrong format of input file!')
+        else:
+            if m.group(1) == 'news':
+                a = News()
+                t = re.search(r'%text:(.+)%', line)
+                a.text = capitalize_line(t.group(1))
+                c = re.search(r'%city:(.+)%t', line)
+                a.city = capitalize_line(c.group(1))
+                a.customstring = a.city + ', ' + datetime.now().strftime("%d/%m/%Y %H.%M")
+            if m.group(1) == 'privatead':
+                a = PrivateAd()
+                e = re.search(r'%expiration_date:(.+)%t', line)
+                #expirationdate_format = '09/09/23'
+                a.expirationdate = datetime.strptime(e.group(1), '%m/%d/%y')
+                delta = a.expirationdate - datetime.now()
+                t = re.search(r'%text:(.+)%', line)
+                a.text = capitalize_line(t.group(1))
+                a.customstring = 'Actual until: ' + a.expirationdate.strftime("%d/%m/%Y") + ', ' + str(delta.days) + ' days left'
+            if m.group(1) == 'necrologue':
+                a = Necrologue()
+                n = re.search(r'%name:(.+)%t', line)
+                a.deceased = capitalize_line(n.group(1))
+                t = re.search(r'%text:(.+)%', line)
+                a.text = capitalize_line(t.group(1))
+                a.customstring = 'In the memory of ' + a.deceased  # Writes "In the memory of <Person>" in the third line of the publication
+        f.close()  # Closing the file
+        os.remove(filepath)  # Deleting the file after processing
+
     a.formoutput()  # Form the output string
     a.writetofile()  # Write to a file
